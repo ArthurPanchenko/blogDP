@@ -1,0 +1,99 @@
+{% extends '_base.html' %}
+{% load like_filter %}
+{% block content %}
+
+
+    <div class="feed__header">
+      <h2>Home</h2>
+    </div>
+
+    {% if user.is_authenticated %}
+    <!-- tweetbox starts -->
+    <div class="tweetBox">
+      <form method="POST" action="{% url 'home' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="tweetbox__input">
+          <img
+            src="{{ user.image.url }}"
+            alt=""
+          />
+          <!-- <input type="text" placeholder="What's happening?" /> -->
+          {{ form.text }}
+          
+        </div>
+        <input id="fileupload" type="file" name="image">
+        <button class="tweetBox__tweetButton" type="submit">Weet</button>
+
+      </form>
+    </div>
+    {% endif %}
+    <!-- tweetbox ends -->
+
+    <!-- post starts -->
+    {% for post in posts %}
+    
+    <a href="{% url 'post-detail' post.pk %}" class="custom-link">
+      <div class="post">
+        <div class="post__avatar">
+          <img
+            src="{{ post.author.image.url }}"
+            alt=""
+          />
+        </div>
+
+        <div class="post__body">
+          <div class="post__header">
+            <div class="post__headerText">
+              <object data="" type="">
+                <h3>
+                  <a href="{% url 'profile' post.author.pk %}" class="">{{ post.author.get_name }}</a>
+                  <span class="post__headerSpecial">
+                    @{{post.author.username}}
+                    {{ post.published_time }}
+                  </span>
+                </h3>
+              </object>
+            </div>
+            <div class="post__headerDescription">
+              <p>{{ post.text }}</p>
+            </div>
+          </div>
+          {% if post.image %}
+            <img src="{{ post.image.url }}" alt=""/>
+          {% endif %}
+          <div class="post__footer">
+            <span class="material-icons"> repeat </span>
+
+            <!-- <span class="material-icons"> favorite_border </span> -->
+            {% liked_by_user post request.user as liked_by_user_flag %}
+            <span class="like-container">
+              <form action="{% url 'like' post.pk %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button 
+                  type="submit" 
+                  name="post_id" 
+                  value="{{ post.pk }}"
+                  
+                  {% if liked_by_user_flag %}
+                    class="material-icons like-btn liked"
+                  {% else %}
+                    class="material-icons like-btn"
+                  {% endif %}
+                  > favorite_border </button>
+              </form>
+              <span class="like-ciunter">{{ post.get_likes_count }}</span>
+            </span>
+            <span class="material-icons"> publish </span>
+          </div>
+        </div>
+        
+      </div>
+    </a>
+    
+    {% endfor %}
+    <!-- post ends -->
+    
+
+
+{% endblock content %}

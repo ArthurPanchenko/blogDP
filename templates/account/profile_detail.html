@@ -1,0 +1,111 @@
+{% extends '_base.html' %}
+{% load like_filter %}
+{% load crispy_forms_tags %}
+{% block content %}
+  <div class="wrapper">
+      <a class="profile-bg main-wrapper d-block"></a>
+      <div>
+        <a href="#" id="profile-link">
+            <img src="{{ user.image.url }}" id="profile-img">
+        </a>
+        <div id="profile-marg">
+          <div id="profile-name">
+            {{ user.get_name }} 
+          </div>
+          <span>
+            <a href="#">@<span>{{ user.username }}</span></a>
+          </span>
+        </div>
+          <div id="profile-state">
+            <ul id="profile-Arrange">
+              <li id="profile-details">
+                    
+                <span class="d-block" id="profile-label">Tweets</span>
+                <span id="profile-number">
+                    {{ posts_count }}
+                </span>
+                    
+              </li>
+              
+            </ul>
+          </div>
+    </div>
+  </div>
+  {% if request.user == user %}
+    <span class="btn btn-warning btn-sm upd-btn" id="openUpdProfile" href="">Update Profile</span>
+  {% endif %}
+  <div class="change-form" id="updProfile">
+    <form action="" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <div class="change-user-form-block"><span>First name</span>{{form.first_name}}</div>
+      
+      
+      <div class="change-user-form-block"><span>Last name</span>{{form.last_name}}</div>
+      
+      <div class="change-user-form-block"><span>Image</span><label for="id_image" class="speclbl">Select Files</label>{{form.image}}</div>
+      <button type="submit" class="btn btn-success btn-sm">Change</button>
+    </form>
+  </div>
+  {% for post in posts %}
+  <a href="{% url 'post-detail' post.pk %}" class="custom-link">
+    <div class="post">
+      <div class="post__avatar">
+        <img
+          src="{{ post.author.image.url }}"
+          alt=""
+        />
+      </div>
+
+      <div class="post__body">
+        <div class="post__header">
+          <div class="post__headerText">
+            <object data="" type="">
+              <h3>
+                <a href="{% url 'profile' post.author.pk %}" class="">{{ post.author.get_name }}</a>
+                <span class="post__headerSpecial">
+                  @{{post.author.username}}
+                  {{ post.published_time }}
+                </span>
+              </h3>
+            </object>
+          </div>
+          <div class="post__headerDescription">
+            <p>{{ post.text }}</p>
+          </div>
+        </div>
+        {% if post.image %}
+          <img src="{{ post.image.url }}" alt=""/>
+        {% endif %}
+        <div class="post__footer">
+          <span class="material-icons"> repeat </span>
+
+          <!-- <span class="material-icons"> favorite_border </span> -->
+          {% liked_by_user post request.user as liked_by_user_flag %}
+          <span class="like-container">
+            <form action="{% url 'like' post.pk %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.path }}">
+              <button 
+                type="submit" 
+                name="post_id" 
+                value="{{ post.pk }}"
+                
+                {% if liked_by_user_flag %}
+                  class="material-icons like-btn liked"
+                {% else %}
+                  class="material-icons like-btn"
+                {% endif %}
+                > favorite_border </button>
+            </form>
+            <span class="like-ciunter">{{ post.get_likes_count }}</span>
+          </span>
+          <span class="material-icons"> publish </span>
+        </div>
+      </div>
+      
+    </div>
+  </a>
+  {% endfor %}
+
+{% endblock content %}
